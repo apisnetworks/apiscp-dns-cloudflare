@@ -275,20 +275,6 @@
 			return true;
 		}
 
-		public function add_zone(string $domain, string $ip): bool
-		{
-			if (!parent::add_zone($domain, $ip)) {
-				return false;
-			}
-			for ($i = 0; $i < 10; $i++) {
-				if (null !== $this->getZoneId($domain)) {
-					return true;
-				}
-				sleep(1);
-			}
-			return warn("Cloudflare zone index has not updated yet - DNS may be incomplete for `%s'", $domain);
-		}
-
 		/**
 		 * Remove DNS zone from nameserver
 		 *
