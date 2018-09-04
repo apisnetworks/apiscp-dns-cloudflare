@@ -39,7 +39,7 @@
 		public function __construct()
 		{
 			parent::__construct();
-			$this->key = $this->get_service_value('dns', 'key', DNS_PROVIDER_KEY);
+			$this->key = $this->getServiceValue('dns', 'key', DNS_PROVIDER_KEY);
 		}
 
 		/**
