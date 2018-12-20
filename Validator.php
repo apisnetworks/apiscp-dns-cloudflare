@@ -48,6 +48,7 @@
 			if (!static::keyValid($var['email'], (string)$var['key'])) {
 				return false;
 			}
+
 			return true;
 		}
 
@@ -58,8 +59,10 @@
 			} catch (ClientException $e) {
 				$response = \json_decode($e->getResponse()->getBody()->getContents(), true);
 				$reason = array_get($response, 'errors.0.error_chain.0.message', "Invalid key");
+
 				return error("CF key failed: %s", $reason);
 			}
+
 			return true;
 		}
 

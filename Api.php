@@ -12,7 +12,8 @@
 
 	use Cloudflare\API\Endpoints\API as CFAPI;
 
-	class Api {
+	class Api
+	{
 
 		/**
 		 * Create a Cloudflare API instance
