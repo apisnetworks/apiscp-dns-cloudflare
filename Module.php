@@ -224,6 +224,9 @@
 					case 'MX':
 						$parameter = $record->priority . " " . $record->content;
 						break;
+					case 'SRV':
+						$parameter = $record->priority . " " . $record->content;
+						break;
 					case 'TXT':
 						$parameter = '"' . $record->content . '"';
 						break;
