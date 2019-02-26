@@ -55,6 +55,9 @@
 		{
 			parent::__construct();
 			$this->key = $this->getServiceValue('dns', 'key', DNS_PROVIDER_KEY);
+			if (isset($this->key['proxy']) && is_string($this->key['proxy'])) {
+				$this->key['proxy'] = $this->key['proxy'] === 'true';
+			}
 		}
 
 		/**
