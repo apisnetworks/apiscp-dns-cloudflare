@@ -37,12 +37,18 @@
 			if (!preg_match(\Regex::EMAIL, $var['email'])) {
 				return error("Email address not properly formed");
 			}
-
-			if (isset($var['proxy']) && !\is_bool($var['proxy'])) {
-				return error("`proxy' must be true or false");
-			} else {
+			if (!isset($var['proxy'])) {
 				// default
 				$var['proxy'] = true;
+			} else {
+				if ($var['proxy'] === 1) {
+					$var['proxy'] = true;
+				} else if ($var['proxy'] === 0) {
+					$var['proxy'] = false;
+				}
+				if (!\is_bool($var['proxy'])) {
+					return error("`proxy' must be true or false");
+				}
 			}
 
 			if (!static::keyValid($var['email'], (string)$var['key'])) {
