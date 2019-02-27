@@ -125,7 +125,6 @@
 				return false;
 			}
 			$api = $this->makeApi(DNS::class);
-
 			$id = $this->getRecordId(new Record($zone, ['name' => $subdomain, 'rr' => $rr, 'parameter' => $param]));
 			if (!$id) {
 				$fqdn = ltrim(implode('.', [$subdomain, $zone]), '.');
@@ -235,7 +234,7 @@
 						$parameter = $record->priority . " " . $record->content;
 						break;
 					case 'TXT':
-						$parameter = '"' . $record->content . '"';
+						$parameter = $record->content;
 						break;
 					default:
 						$parameter = $record->content;
@@ -307,6 +306,7 @@
 
 		protected function populateZoneMetaCache()
 		{
+
 			$api = $this->makeApi(Zones::class);
 			$raw = array_map(function ($zone) {
 				return (array)$zone;
@@ -372,6 +372,24 @@
 
 			return true;
 		}
+
+		protected function canonicalizeRecord(
+			string &$zone,
+			string &$subdomain,
+			string &$rr,
+			string &$param,
+			int &$ttl = null
+		): bool {
+			if (!parent::canonicalizeRecord($zone, $subdomain, $rr, $param, $ttl)) {
+				return false;
+			}
+			if ($rr === 'TXT') {
+				$param = trim($param, '"');
+			}
+			return true;
+
+		}
+
 
 		protected function hasCnameApexRestriction(): bool
 		{
