@@ -80,6 +80,9 @@
 			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $param, $ttl)) {
 				return false;
 			}
+			/**
+			 * @var DNS $api
+			 */
 			$api = $this->makeApi(DNS::class);
 			$record = new Record($zone, [
 				'name'      => $subdomain,
@@ -95,7 +98,9 @@
 				/** @var $api API */
 				$ret = $api->addRecord($this->getZoneId($zone), $record['rr'], $record['name'], $record['parameter'],
 					$record['ttl'], $this->key['proxy'] ?? false, $record->getMeta('priority') ?? '');
-				$this->addCache($record);
+				if ($ret) {
+					$this->addCache($record);
+				}
 			} catch (ClientException $e) {
 				$error = json_decode($e->getResponse()->getBody()->getContents(), true);
 				$fqdn = ltrim(implode('.', [$subdomain, $zone]), '.');
@@ -125,21 +130,22 @@
 				return false;
 			}
 			$api = $this->makeApi(DNS::class);
-			$id = $this->getRecordId(new Record($zone, ['name' => $subdomain, 'rr' => $rr, 'parameter' => $param]));
+			$record = new Record($zone, ['name' => $subdomain, 'rr' => $rr, 'parameter' => $param]);
+			$id = $this->getRecordId($record);
+
 			if (!$id) {
 				$fqdn = ltrim(implode('.', [$subdomain, $zone]), '.');
-
 				return error("Record `%s' (rr: `%s', param: `%s')  does not exist", $fqdn, $rr, $param);
 			}
 
 			try {
-				return $api->deleteRecord($this->getZoneId($zone), $id);
+				$ret = $api->deleteRecord($this->getZoneId($zone), $id);
+				$this->removeCache($record);
+				return $ret;
 			} catch (ClientException $e) {
 				$fqdn = ltrim(implode('.', [$subdomain, $zone]), '.');
-
 				return error("Failed to delete record `%s' type %s", $fqdn, $rr);
 			}
-			array_forget($this->zoneCache[$r->getZone()], $this->getCacheKey($r));
 
 			return false;
 		}
@@ -214,9 +220,7 @@
 					return null;
 				}
 				$records = $client->listRecords($id)->result;
-				if (!$records) {
-					return null;
-				}
+				// naked zone if $records === []
 			} catch (ClientException $e) {
 				error("Failed to transfer DNS records from CF - try again later");
 
@@ -244,17 +248,15 @@
 					$key = '@';
 				}
 
-				$this->addCache(new Record($domain,
+				$r = (new Record($domain,
 					[
 						'name'      => $key,
 						'rr'        => $record->type,
 						'ttl'       => $record->ttl,
 						'parameter' => $parameter,
-						'meta'      => [
-							'id' => $record->id
-						]
 					]
-				));
+				))->setMeta('id', $record->id);
+				$this->addCache($r);
 				$preamble[] = $record->name . ".\t" . $record->ttl . "\tIN\t" .
 					$record->type . "\t" . $parameter;
 			}
@@ -350,7 +352,7 @@
 			try {
 				$merged = clone $old;
 				$new = $merged->merge($new);
-				$api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), [
+				$ret = $api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), [
 					'type'    => $new['rr'],
 					'name'    => $new['name'],
 					'content' => $new['parameter'],
