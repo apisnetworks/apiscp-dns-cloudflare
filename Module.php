@@ -15,7 +15,6 @@
 	use Cloudflare\API\Endpoints\Zones;
 	use GuzzleHttp\Exception\ClientException;
 	use Module\Provider\Contracts\ProviderInterface;
-	use Opcenter\Dns\Record;
 
 	class Module extends \Dns_Module implements ProviderInterface
 	{
@@ -92,12 +91,23 @@
 			]);
 
 			try {
-				if ($record['rr'] === 'MX') {
-					$record['parameter'] = $record->getMeta('data');
-				}
+				$cfu = clone $record;
+				/**
+				 * Spreading is a bit nuanced. We want expansion with record updates to
+				 * coerce types if necessary, but addRecord expects "data" to be broken out.
+				 */
+				$data = $cfu->spreadParameters();
 				/** @var $api API */
-				$ret = $api->addRecord($this->getZoneId($zone), $record['rr'], $record['name'], $record['parameter'],
-					$record['ttl'], $this->key['proxy'] ?? false, $record->getMeta('priority') ?? '');
+				$ret = $api->addRecord(
+					$this->getZoneId($zone),
+					$cfu['rr'],
+					$cfu['name'],
+					$cfu['parameter'],
+					$cfu['ttl'],
+					$this->key['proxy'] ?? false,
+					(string)($cfu->getMeta('priority') ?? ''),
+					$data['data'] ?? []
+				);
 				if ($ret) {
 					$this->addCache($record);
 				}
@@ -219,7 +229,13 @@
 
 					return null;
 				}
-				$records = $client->listRecords($id)->result;
+				$page = 1;
+				$records = [];
+				do {
+					$query = $client->listRecords($id, '', '', '', $page, 10);
+					$records = array_merge($records, $query->result);
+					$pagenr = data_get($query, 'result_info.total_pages');
+				} while ($pagenr >= ++$page);
 				// naked zone if $records === []
 			} catch (ClientException $e) {
 				error("Failed to transfer DNS records from CF - try again later");
@@ -232,6 +248,7 @@
 				$truncateLength = \strlen($record->zone_name);
 				switch (strtoupper($record->type)) {
 					case 'MX':
+					case 'URI':
 						$parameter = $record->priority . " " . $record->content;
 						break;
 					case 'SRV':
@@ -352,20 +369,23 @@
 			try {
 				$merged = clone $old;
 				$new = $merged->merge($new);
-				$ret = $api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), [
-					'type'    => $new['rr'],
-					'name'    => $new['name'],
-					'content' => $new['parameter'],
-					'ttl'     => $new['ttl'] ?? null
+				$cfu = clone $new;
+				$data = $cfu->spreadParameters();
+
+				$api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), $data + [
+					'type'    => $cfu['rr'],
+					'name'    => $cfu['name'],
+					'ttl'     => $cfu['ttl'] ?? null,
+					'content' => $cfu['parameter']
 				]);
 			} catch (ClientException $e) {
 				$reason = \json_decode($e->getResponse()->getBody()->getContents());
-
-				return error("Failed to update record `%s' on zone `%s' (old - rr: `%s', param: `%s'; new - rr: `%s', param: `%s'): %s",
+				dd($reason);
+				return error("Failed to update record `%s' on zone `%s' (old - rr: `%s', param: `%s'; new - name: `%s' rr: `%s', param: `%s'): %s",
 					$old['name'],
 					$zone,
 					$old['rr'],
-					$old['parameter'], $new['name'] ?? $old['name'], $new['parameter'] ?? $old['parameter'],
+					$old['parameter'], $new['name'] ?? $old['name'], $new['rr'], $new['parameter'] ?? $old['parameter'],
 					$reason->errors[0]->message
 				);
 			}
@@ -385,8 +405,12 @@
 			if (!parent::canonicalizeRecord($zone, $subdomain, $rr, $param, $ttl)) {
 				return false;
 			}
-			if ($rr === 'TXT') {
+			if ($rr === 'TXT' && !preg_match('/^"[^"]*"$/', $param)) {
 				$param = trim($param, '"');
+			}
+			// @TODO move to general canonicalization?
+			if ($rr === 'CNAME') {
+				$param = rtrim($param, '.');
 			}
 			return true;
 
