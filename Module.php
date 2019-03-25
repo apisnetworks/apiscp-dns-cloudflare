@@ -13,6 +13,7 @@
 	use Cloudflare\API\Endpoints\API;
 	use Cloudflare\API\Endpoints\DNS;
 	use Cloudflare\API\Endpoints\Zones;
+	use Opcenter\Dns\Record as RecordBase;
 	use GuzzleHttp\Exception\ClientException;
 	use Module\Provider\Contracts\ProviderInterface;
 
@@ -28,23 +29,23 @@
 		protected static $permitted_records = [
 			'A',
 			'AAAA',
-			'CNAME',
-			'MX',
-			'LOC',
-			'SRV',
-			'SPF',
-			'TXT',
-			'NS',
 			'CAA',
-			'PTR',
 			'CERT',
+			'CNAME',
 			'DNSKEY',
 			'DS',
+			'LOC',
+			'MX',
 			'NAPTR',
+			'NS',
+			'PTR',
 			'SMIMEA',
+			'SRV',
+			'SPF',
 			'SSHFP',
 			'TLSA',
-			'URI'
+			'TXT',
+			'URI',
 		];
 		private $key;
 		//@var int DNS_TTL
@@ -124,6 +125,39 @@
 
 			return $ret;
 		}
+
+		/**
+		 * Verify record exists
+		 *
+		 * CloudFlare handles a boutique of resource records not available in PHP
+		 *
+		 * @param string      $zone
+		 * @param string      $subdomain
+		 * @param string      $rr
+		 * @param string|null $parameter
+		 * @return bool
+		 */
+		public function record_exists(
+			string $zone,
+			string $subdomain,
+			string $rr = 'ANY',
+			string $parameter = null
+		): bool {
+			if (static::record2const($rr)) {
+				return parent::record_exists($zone, $subdomain, $rr, $parameter);
+			}
+
+			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $parameter)) {
+				return false;
+			}
+			$record = new Record($zone, [
+				'name' => $subdomain,
+				'rr' => $rr,
+				'parameter' => $parameter
+			]);
+			return (bool)$this->getRecordId($record);
+		}
+
 
 		/**
 		 * Remove a DNS record
@@ -270,7 +304,7 @@
 						'name'      => $key,
 						'rr'        => $record->type,
 						'ttl'       => $record->ttl,
-						'parameter' => $parameter,
+						'parameter' => str_replace("\t", " ", $parameter),
 					]
 				))->setMeta('id', $record->id);
 				$this->addCache($r);
@@ -352,7 +386,7 @@
 		 * @param Record $new
 		 * @return bool
 		 */
-		protected function atomicUpdate(string $zone, Record $old, Record $new): bool
+		protected function atomicUpdate(string $zone, RecordBase $old, RecordBase $new): bool
 		{
 			// @var \Cloudflare\Api\Endpoints\DNS @api
 			if (!$this->canonicalizeRecord($zone, $old['name'], $old['rr'], $old['parameter'], $old['ttl'])) {
@@ -380,7 +414,6 @@
 				]);
 			} catch (ClientException $e) {
 				$reason = \json_decode($e->getResponse()->getBody()->getContents());
-				dd($reason);
 				return error("Failed to update record `%s' on zone `%s' (old - rr: `%s', param: `%s'; new - name: `%s' rr: `%s', param: `%s'): %s",
 					$old['name'],
 					$zone,
@@ -404,6 +437,9 @@
 		): bool {
 			if (!parent::canonicalizeRecord($zone, $subdomain, $rr, $param, $ttl)) {
 				return false;
+			}
+			if ($rr === 'MX') {
+				$param = rtrim($param, '.');
 			}
 			if ($rr === 'TXT' && !preg_match('/^"[^"]*"$/', $param)) {
 				$param = trim($param, '"');

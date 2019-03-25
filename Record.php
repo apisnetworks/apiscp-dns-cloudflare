@@ -43,6 +43,16 @@
 					]
 				];
 			}
+			if ($this->matches('rr', 'CAA')) {
+				$this['parameter'] = '';
+				return [
+					'data' => [
+						'flags' => (int)$this->getMeta('flags'),
+						'tag'   => $this->getMeta('tag'),
+						'value' => $this->getMeta('data')
+					]
+				];
+			}
 			if ($this->matches('rr', 'CERT')) {
 				$this['parameter'] = '';
 				return [
@@ -79,6 +89,26 @@
 				];
 			}
 
+			if ($this->matches('rr', 'LOC')) {
+				$this['parameter'] = '';
+				return [
+					'data' => [
+						'lat_degrees'    => (int)$this->getMeta('lat_degrees'),
+						'lat_minutes'    => (int)$this->getMeta('lat_minutes'),
+						'lat_seconds'    => (int)$this->getMeta('lat_seconds'),
+						'lat_direction'  => $this->getMeta('lat_direction'),
+						'long_degrees'   => (int)$this->getMeta('long_degrees'),
+						'long_minutes'   => (int)$this->getMeta('long_minutes'),
+						'long_seconds'   => (int)$this->getMeta('long_seconds'),
+						'long_direction' => $this->getMeta('long_direction'),
+						'altitude'       => (float)$this->getMeta('altitude'),
+						'size'           => (int)$this->getMeta('size'),
+						'precision_horz' => (float)$this->getMeta('precision_horz'),
+						'precision_vert' => (float)$this->getMeta('precision_vert'),
+					]
+				];
+			}
+
 			if ($this->matches('rr', 'NAPTR')) {
 				$this['parameter'] = '';
 				return [
@@ -107,12 +137,11 @@
 
 			if ($this->matches('rr', 'SSHFP')) {
 				$this['parameter'] = '';
-
 				return [
 					'data' => [
-						'algorithm'   => (int)$this->getMeta('order'),
-						'type'        => (int)$this->getMeta('preference'),
-						'fingerpring' => (string)$this->getMeta('data')
+						'algorithm'   => (int)$this->getMeta('algorithm'),
+						'type'        => (int)$this->getMeta('type'),
+						'fingerprint' => (string)$this->getMeta('data')
 					]
 				];
 			}
