@@ -405,12 +405,12 @@
 				$new = $merged->merge($new);
 				$cfu = clone $new;
 				$data = $cfu->spreadParameters();
-
 				$api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), $data + [
 					'type'    => $cfu['rr'],
 					'name'    => $cfu['name'],
 					'ttl'     => $cfu['ttl'] ?? null,
-					'content' => $cfu['parameter']
+					'content' => $cfu['parameter'],
+					'priority' => $data['data']['priority'] ?? null,
 				]);
 			} catch (ClientException $e) {
 				$reason = \json_decode($e->getResponse()->getBody()->getContents());

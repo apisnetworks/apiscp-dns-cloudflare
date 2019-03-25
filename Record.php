@@ -164,8 +164,9 @@
 
 				return [
 					'data' => [
+						'priority'       => (int)$this->getMeta('priority'),
 						'weight'         => (int)$this->getMeta('weight'),
-						'content'        => (string)$this->getMeta('data')
+						'content'        => (string)$this->getMeta('data'),
 					]
 				];
 			}
