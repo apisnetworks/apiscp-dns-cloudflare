@@ -419,7 +419,7 @@
 					$zone,
 					$old['rr'],
 					$old['parameter'], $new['name'] ?? $old['name'], $new['rr'], $new['parameter'] ?? $old['parameter'],
-					$reason->errors[0]->message
+					$reason->errors[0]->error_chain[0]->message ?? $reason->errors[0]->message
 				);
 			}
 			array_forget($this->zoneCache[$old->getZone()], $this->getCacheKey($old));
@@ -447,6 +447,11 @@
 			// @TODO move to general canonicalization?
 			if ($rr === 'CNAME') {
 				$param = rtrim($param, '.');
+			}
+			if (!$ttl) {
+				$ttl = self::DNS_TTL;
+			} else if ($ttl < 1 || $ttl > 2**31-1) {
+				return error("DNS TTL `%d' exceeds permitted limits [1, 2147483647]", $ttl);
 			}
 			return true;
 

@@ -29,7 +29,6 @@
 					'priority' => (int)$this->getMeta('priority'),
 				];
 			}
-
 			if ($this->matches('rr', 'SRV')) {
 				$this['parameter'] = substr($this['parameter'], strrpos($this['parameter'], ' ')+1);
 				return [
