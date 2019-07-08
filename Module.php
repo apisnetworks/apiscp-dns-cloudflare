@@ -58,6 +58,7 @@
 			if (isset($this->key['proxy']) && is_string($this->key['proxy'])) {
 				$this->key['proxy'] = $this->key['proxy'] === 'true';
 			}
+			$this->key['jumpstart'] = (bool)($this->key['jumpstart'] ?? false);
 		}
 
 		/**
@@ -205,7 +206,7 @@
 		{
 			$api = $this->makeApi(Zones::class);
 			try {
-				$api->addZone($domain, true);
+				$api->addZone($domain, $this->key['jumpstart']);
 			} catch (ClientException $e) {
 				if (false !== strpos($e->getMessage(), "1061,")) {
 					return info("Zone `%s' present in Cloudflare - not overwriting", $domain);

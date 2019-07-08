@@ -25,7 +25,7 @@
 		 * @param                      $var service value
 		 * @return bool
 		 */
-		public function valid(ConfigurationContext $ctx, $var): bool
+		public function valid(ConfigurationContext $ctx, &$var): bool
 		{
 			if (!\is_array($var) || !isset($var['email'], $var['key'])) {
 				return error("Cloudflare key must provide both email and key");
@@ -37,18 +37,22 @@
 			if (!preg_match(\Regex::EMAIL, $var['email'])) {
 				return error("Email address not properly formed");
 			}
-			if (!isset($var['proxy'])) {
-				// default
-				$var['proxy'] = true;
-			} else {
-				if ($var['proxy'] === 1) {
-					$var['proxy'] = true;
-				} else if ($var['proxy'] === 0) {
-					$var['proxy'] = false;
+
+			foreach (['proxy', 'jumpstart'] as $name) {
+				if (!isset($var[$name])) {
+					// default
+					$var[$name] = true;
+				} else {
+					if ($var[$name] === 1) {
+						$var[$name] = true;
+					} else if ($var[$name] === 0) {
+						$var[$name] = false;
+					}
+					if (!\is_bool($var[$name])) {
+						return error("`%s' must be true or false", $name);
+					}
 				}
-				if (!\is_bool($var['proxy'])) {
-					return error("`proxy' must be true or false");
-				}
+
 			}
 
 			if (!static::keyValid($var['email'], (string)$var['key'])) {
