@@ -144,10 +144,6 @@
 			string $rr = 'ANY',
 			string $parameter = null
 		): bool {
-			if (static::record2const($rr)) {
-				return parent::record_exists($zone, $subdomain, $rr, $parameter);
-			}
-
 			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $parameter)) {
 				return false;
 			}
