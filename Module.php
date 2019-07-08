@@ -144,6 +144,7 @@
 			string $rr = 'ANY',
 			string $parameter = null
 		): bool {
+			$parameter = (string)$parameter;
 			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $parameter)) {
 				return false;
 			}
