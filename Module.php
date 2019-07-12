@@ -390,6 +390,8 @@
 			if (!$this->canonicalizeRecord($zone, $old['name'], $old['rr'], $old['parameter'], $old['ttl'])) {
 				return false;
 			}
+			// ensure old TTL is always unset
+			$old['ttl'] = null;
 			if (!$this->getRecordId($old)) {
 				return error("failed to find record ID in CF zone `%s' - does `%s' (rr: `%s', parameter: `%s') exist?",
 					$zone, $old['name'], $old['rr'], $old['parameter']);
