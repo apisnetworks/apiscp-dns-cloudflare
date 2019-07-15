@@ -43,9 +43,9 @@
 					// default
 					$var[$name] = true;
 				} else {
-					if ($var[$name] === 1) {
+					if ($var[$name] === 1 || $var[$name] === "1") {
 						$var[$name] = true;
-					} else if ($var[$name] === 0) {
+					} else if ($var[$name] === 0 || $var[$name] === "0") {
 						$var[$name] = false;
 					}
 					if (!\is_bool($var[$name])) {
