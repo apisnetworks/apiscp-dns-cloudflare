@@ -31,9 +31,6 @@
 				return error("Cloudflare key must provide both email and key");
 			}
 
-			if (!ctype_xdigit($var['key'])) {
-				return error("Key must be in hexadecimal");
-			}
 			if (!preg_match(\Regex::EMAIL, $var['email'])) {
 				return error("Email address not properly formed");
 			}
