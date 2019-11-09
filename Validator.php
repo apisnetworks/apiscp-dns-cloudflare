@@ -14,6 +14,7 @@
 	use Cloudflare\API\Endpoints\User;
 	use GuzzleHttp\Exception\ClientException;
 	use Opcenter\Dns\Contracts\ServiceProvider;
+	use Opcenter\Dns\Providers\Cloudflare\Extensions\TokenVerify;
 	use Opcenter\Service\ConfigurationContext;
 
 	class Validator implements ServiceProvider
@@ -27,14 +28,18 @@
 		 */
 		public function valid(ConfigurationContext $ctx, &$var): bool
 		{
-			if (!\is_array($var) || !isset($var['email'], $var['key'])) {
-				return error("Cloudflare key must provide both email and key");
+			// accept $var as a single token or as an array
+			if (is_string($var)) {
+				return static::keyValid(null, $var);
 			}
 
-			if (!ctype_xdigit($var['key'])) {
+			if (!isset($var['key'])) {
+				return error("Cloudflare key must provided");
+			}
+			if (isset($var['email']) && !ctype_xdigit($var['key'])) {
 				return error("Key must be in hexadecimal");
 			}
-			if (!preg_match(\Regex::EMAIL, $var['email'])) {
+			if (isset($var['email']) && !preg_match(\Regex::EMAIL, $var['email'])) {
 				return error("Email address not properly formed");
 			}
 
@@ -55,17 +60,28 @@
 
 			}
 
-			if (!static::keyValid($var['email'], (string)$var['key'])) {
+			if (!static::keyValid($var['email'] ?? null, (string)$var['key'])) {
 				return false;
 			}
 
 			return true;
 		}
 
-		public static function keyValid(string $email, string $key): bool
+		/**
+		 * Given key/token is valid
+		 *
+		 * @param string|null $email
+		 * @param string      $key
+		 * @return bool
+		 */
+		public static function keyValid(?string $email, string $key): bool
 		{
 			try {
-				Api::api($email, $key, User::class)->getUserID();
+				if (!$email) {
+					Api::api($email, $key, TokenVerify::class)->verifyToken();
+				} else {
+					Api::api($email, $key, User::class)->getUserDetails();
+				}
 			} catch (ClientException $e) {
 				$response = \json_decode($e->getResponse()->getBody()->getContents(), true);
 				$reason = array_get($response, 'errors.0.error_chain.0.message', "Invalid key");
