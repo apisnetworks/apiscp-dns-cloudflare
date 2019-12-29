@@ -171,4 +171,21 @@
 			}
 			return [];
 		}
+
+		public function is(\Opcenter\Dns\Record $r)
+		{
+			if (parent::is($r)) {
+				return true;
+			}
+			if ($r['rr'] !== 'TXT') {
+				return false;
+			}
+
+			// apply second loop
+			$r['parameter'] = $r['parameter'][0] === $r['parameter'][-1] && $r['parameter'][0] === '"' ?
+				substr($r['parameter'], 1, -1) :
+				'"' . $r['parameter'] . '"';
+
+			return parent::is($r);
+		}
 	}
