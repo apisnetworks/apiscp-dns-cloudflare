@@ -114,10 +114,10 @@
 					'data' => [
 						'order'       => (int)$this->getMeta('order'),
 						'preference'  => (int)$this->getMeta('preference'),
-						'flags'       => (string)$this->getMeta('flags'),
-						'service'     => (string)$this->getMeta('service'),
-						'regex'       => (string)$this->getMeta('regex'),
-						'replacement' => (string)$this->getMeta('data')
+						'flags'       => $this->trim((string)$this->getMeta('flags')),
+						'service'     => $this->trim((string)$this->getMeta('service')),
+						'regex'       => $this->trim((string)$this->getMeta('regex')),
+						'replacement' => $this->trim((string)$this->getMeta('data'))
 					]
 				];
 			}
@@ -160,12 +160,11 @@
 
 			if ($this->matches('rr', 'URI')) {
 				$this['parameter'] = '';
-
 				return [
 					'data' => [
 						'priority'       => (int)$this->getMeta('priority'),
 						'weight'         => (int)$this->getMeta('weight'),
-						'content'        => (string)$this->getMeta('data'),
+						'content'        => $this->trim((string)$this->getMeta('data')),
 					]
 				];
 			}
@@ -182,9 +181,7 @@
 			}
 
 			// apply second loop
-			$r['parameter'] = $r['parameter'][0] === $r['parameter'][-1] && $r['parameter'][0] === '"' ?
-				substr($r['parameter'], 1, -1) :
-				'"' . $r['parameter'] . '"';
+			$r['parameter'] = $this->trim($r['parameter']);
 
 			return parent::is($r);
 		}

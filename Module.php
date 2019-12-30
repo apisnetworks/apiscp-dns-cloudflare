@@ -284,8 +284,10 @@
 				$truncateLength = \strlen($record->zone_name);
 				switch (strtoupper($record->type)) {
 					case 'MX':
+						$parameter = $record->priority . ' ' . $record->content;
+						break;
 					case 'URI':
-						$parameter = $record->priority . " " . $record->content;
+						$parameter = $record->priority . " " . $record->data->weight . " " . $record->data->content;
 						break;
 					case 'SRV':
 						$parameter = $record->priority . " " . $record->content;
