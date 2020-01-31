@@ -115,7 +115,7 @@
 					$data['data'] ?? []
 				);
 				if ($ret) {
-					$this->addCache($record);
+					$this->addCache($record->setMeta('id', $api->getBody()->result->id));
 				}
 			} catch (ClientException $e) {
 				$error = json_decode($e->getResponse()->getBody()->getContents(), true);
