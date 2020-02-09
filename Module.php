@@ -108,7 +108,7 @@
 					$this->getZoneId($zone),
 					$cfu['rr'],
 					$cfu['name'],
-					$cfu['parameter'],
+					(string)$cfu['parameter'],
 					$cfu['ttl'],
 					$this->key['proxy'] ?? false,
 					(string)($cfu->getMeta('priority') ?? ''),
