@@ -55,13 +55,12 @@
 		{
 			parent::__construct();
 			$this->key = $this->getServiceValue('dns', 'key', DNS_PROVIDER_KEY);
-			if (!is_array($this->key)) {
-				return;
-			}
-
-			if (isset($this->key['proxy']) && is_string($this->key['proxy'])) {
+			if (!isset($this->key['proxy'])) {
+				$this->key['proxy'] = false;
+			} else if (is_string($this->key['proxy'])) {
 				$this->key['proxy'] = $this->key['proxy'] === 'true';
 			}
+
 			$this->key['jumpstart'] = (bool)($this->key['jumpstart'] ?? false);
 		}
 
@@ -227,8 +226,16 @@
 		 */
 		public function remove_zone_backend(string $domain): bool
 		{
-			// limitation of cloudflare-sdk
-			return info("not implemented");
+			$client = $this->makeApi(Zones::class);
+			$id = $this->getZoneId($domain);
+			try {
+				$client->deleteZone($id);
+				unset($this->zoneCache[$domain]);
+			} catch (ClientException $e) {
+				return error("Failed to delete zone `%s', error: %s", $domain, $e->getMessage());
+			}
+
+			return true;
 		}
 
 		/**
@@ -471,7 +478,6 @@
 			return true;
 
 		}
-
 
 		protected function hasCnameApexRestriction(): bool
 		{
