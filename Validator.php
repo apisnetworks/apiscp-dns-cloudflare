@@ -12,6 +12,7 @@
 	namespace Opcenter\Dns\Providers\Cloudflare;
 
 	use Cloudflare\API\Endpoints\User;
+	use Cloudflare\API\Endpoints\Zones;
 	use GuzzleHttp\Exception\ClientException;
 	use Opcenter\Dns\Contracts\ServiceProvider;
 	use Opcenter\Dns\Providers\Cloudflare\Extensions\TokenVerify;
@@ -79,6 +80,12 @@
 			try {
 				if (!$email) {
 					Api::api($email, $key, TokenVerify::class)->verifyToken();
+					// ensure privileges exist to list zones
+					try {
+						Api::api($email, $key, Zones::class)->listZones();
+					} catch (ClientException $e) {
+						return error("Token lacks edit access on Zone.Zone resource");
+					}
 				} else {
 					Api::api($email, $key, User::class)->getUserDetails();
 				}

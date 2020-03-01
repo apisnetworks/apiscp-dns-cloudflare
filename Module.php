@@ -207,7 +207,7 @@
 		{
 			$api = $this->makeApi(Zones::class);
 			try {
-				$api->addZone($domain, $this->key['jumpstart']);
+				$api->addZone($domain, $this->key['jumpstart'] ?? false);
 			} catch (ClientException $e) {
 				if (false !== strpos($e->getMessage(), "1061,")) {
 					return info("Zone `%s' present in Cloudflare - not overwriting", $domain);
