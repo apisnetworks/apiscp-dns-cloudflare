@@ -58,10 +58,11 @@
 			if (is_scalar($this->key)) {
 				// auth bearer
 				$this->key = [
-					'email' => null,
-					'key'   => $this->key
+					'key'   => (string)$this->key
 				];
 			}
+
+			$this->key += ['email' => null, 'key' => null];
 
 			if (!isset($this->key['proxy'])) {
 				$this->key['proxy'] = false;
