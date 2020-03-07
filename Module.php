@@ -55,6 +55,14 @@
 		{
 			parent::__construct();
 			$this->key = $this->getServiceValue('dns', 'key', DNS_PROVIDER_KEY);
+			if (is_scalar($this->key)) {
+				// auth bearer
+				$this->key = [
+					'email' => null,
+					'key'   => $this->key
+				];
+			}
+
 			if (!isset($this->key['proxy'])) {
 				$this->key['proxy'] = false;
 			} else if (is_string($this->key['proxy'])) {
@@ -328,18 +336,9 @@
 
 		private function makeApi(string $abstract): API
 		{
-			if (is_scalar($this->key)) {
-				// auth bearer token
-				$args = [null, $this->key];
-			} else {
-				$args = [
-					$this->key['email'],
-					$this->key['key']
-				];
-			}
 			return \Opcenter\Dns\Providers\Cloudflare\Api::api(
-				$args[0],
-				$args[1],
+				$this->key['email'],
+				$this->key['key'],
 				$abstract
 			);
 		}
