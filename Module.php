@@ -55,7 +55,7 @@
 		{
 			parent::__construct();
 			$this->key = $this->getServiceValue('dns', 'key', DNS_PROVIDER_KEY);
-			if (is_scalar($this->key)) {
+			if (null === $this->key || is_scalar($this->key)) {
 				// auth bearer
 				$this->key = [
 					'key'   => (string)$this->key
