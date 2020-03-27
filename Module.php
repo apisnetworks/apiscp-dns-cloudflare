@@ -381,9 +381,13 @@
 		{
 
 			$api = $this->makeApi(Zones::class);
+			/**
+			 * @todo prime whole cache vs per-domain priming on larger accounts
+			 */
 			$raw = array_map(function ($zone) {
 				return (array)$zone;
-			}, $api->listZones()->result);
+			}, $api->listZones('', '', 1, 1000)->result);
+
 			$this->metaCache = array_merge($this->metaCache, array_combine(array_column($raw, 'name'), $raw));
 		}
 
