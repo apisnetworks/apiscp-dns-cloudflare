@@ -68,6 +68,8 @@
 				$this->key['proxy'] = false;
 			} else if (is_string($this->key['proxy'])) {
 				$this->key['proxy'] = $this->key['proxy'] === 'true';
+			} else {
+				$this->key['proxy'] = (bool)$this->key['proxy'];
 			}
 
 			$this->key['jumpstart'] = (bool)($this->key['jumpstart'] ?? false);
@@ -118,7 +120,7 @@
 					$cfu['name'],
 					(string)$cfu['parameter'],
 					$cfu['ttl'],
-					$this->key['proxy'] ?? false,
+					$this->key['proxy'],
 					(string)($cfu->getMeta('priority') ?? ''),
 					$data['data'] ?? []
 				);
