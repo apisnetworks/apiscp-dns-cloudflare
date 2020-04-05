@@ -120,7 +120,7 @@
 					$cfu['name'],
 					(string)$cfu['parameter'],
 					$cfu['ttl'],
-					$this->key['proxy'],
+					$this->isProxiable($cfu['rr']),
 					(string)($cfu->getMeta('priority') ?? ''),
 					$data['data'] ?? []
 				);
@@ -139,6 +139,21 @@
 			}
 
 			return $ret;
+		}
+
+		/**
+		 * Record may be proxied in CF
+		 *
+		 * @param string $rr
+		 * @return bool
+		 */
+		private function isProxiable(string $rr): bool
+		{
+			if (!$this->key['proxy']) {
+				return false;
+			}
+
+			return $rr === 'A' || $rr === 'AAAA' || $rr === 'CNAME';
 		}
 
 		/**
