@@ -24,6 +24,10 @@
 		 */
 		protected const HAS_ORIGIN_MARKER = true;
 		public const DNS_TTL = 1800;
+
+		// @var int minimum TTL
+		public const DNS_TTL_MIN = 120;
+
 		use \NamespaceUtilitiesTrait;
 		// @var array API credentials
 		protected static $permitted_records = [
