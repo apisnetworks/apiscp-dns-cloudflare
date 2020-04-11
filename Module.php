@@ -508,4 +508,28 @@
 		{
 			return false;
 		}
+
+		protected function getRecordId(RecordBase $r): ?string
+		{
+
+			if ($r['rr'] !== 'ANY') {
+				return parent::getRecordId($r);
+			}
+
+			// populates zone cache as well
+			$this->getCacheKey($r);
+
+			// CloudFlare doesn't support ANY directly
+			$chk = array_get($this->zoneCache[$r->getZone()], 'records', []);
+			$key = $r['name'] === '' ? '@' : $r['name'];
+			foreach ($chk as $c) {
+				if (!empty($c[$key])) {
+					return current($c[$key])->getMeta('id');
+				}
+			}
+
+			return null;
+		}
+
+
 	}
