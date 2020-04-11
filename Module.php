@@ -175,7 +175,7 @@
 			string $zone,
 			string $subdomain,
 			string $rr = 'ANY',
-			string $parameter = null
+			string $parameter = ''
 		): bool {
 			$parameter = (string)$parameter;
 			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $parameter)) {
@@ -196,12 +196,12 @@
 		 * @param string      $zone
 		 * @param string      $subdomain
 		 * @param string      $rr
-		 * @param string|null $param
+		 * @param string      $param
 		 * @return bool
 		 */
-		public function remove_record(string $zone, string $subdomain, string $rr, string $param = null): bool
+		public function remove_record(string $zone, string $subdomain, string $rr, string $param = ''): bool
 		{
-			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $param, $ttl)) {
+			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $param)) {
 				return false;
 			}
 			$api = $this->makeApi(DNS::class);
