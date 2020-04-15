@@ -10,10 +10,10 @@
 
 	namespace Opcenter\Dns\Providers\Cloudflare;
 
-	use Cloudflare\API\Adapter\Guzzle;
 	use Cloudflare\API\Auth\APIKey;
 	use Cloudflare\API\Endpoints\API as CFAPI;
 	use Opcenter\Dns\Providers\Cloudflare\Extensions\APIToken;
+	use Opcenter\Dns\Providers\Cloudflare\Extensions\GuzzleAdapter;
 
 	class Api
 	{
@@ -35,7 +35,8 @@
 				// Scoped API token
 				$authHandler = new APIToken($key);
 			}
-			$adapter = new Guzzle($authHandler);
+
+			$adapter = new GuzzleAdapter($authHandler);
 
 			return new $abstract($adapter);
 		}
