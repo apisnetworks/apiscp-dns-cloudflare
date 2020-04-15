@@ -65,6 +65,7 @@
 						$e->getRequest()
 					);
 				}
+				throw $e;
 			}
 
 			$this->checkError($response);
@@ -74,7 +75,7 @@
 
 		protected function checkError(ResponseInterface $response)
 		{
-			$json = json_decode($response->getBody());
+			$json = json_decode((string)$response->getBody());
 
 			if (json_last_error() !== JSON_ERROR_NONE) {
 				throw new JSONException();
