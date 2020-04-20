@@ -16,6 +16,7 @@
 	use Opcenter\Dns\Record as RecordBase;
 	use GuzzleHttp\Exception\ClientException;
 	use Module\Provider\Contracts\ProviderInterface;
+	use Opcenter\Net\IpCommon;
 
 	class Module extends \Dns_Module implements ProviderInterface
 	{
@@ -51,6 +52,7 @@
 			'TXT',
 			'URI',
 		];
+
 		private $key;
 		//@var int DNS_TTL
 		private $metaCache = [];
@@ -124,7 +126,7 @@
 					$cfu['name'],
 					(string)$cfu['parameter'],
 					$cfu['ttl'],
-					$this->isProxiable($cfu['rr']),
+					$this->isProxiable($cfu['rr'], (string)$cfu['parameter']),
 					(string)($cfu->getMeta('priority') ?? ''),
 					$data['data'] ?? []
 				);
@@ -151,13 +153,22 @@
 		 * @param string $rr
 		 * @return bool
 		 */
-		private function isProxiable(string $rr): bool
+		private function isProxiable(string $rr, string $param = ''): bool
 		{
 			if (!$this->key['proxy']) {
 				return false;
 			}
 
-			return $rr === 'A' || $rr === 'AAAA' || $rr === 'CNAME';
+			if ($rr === 'CNAME') {
+				return true;
+			}
+
+			if ($rr !== 'AAAA' && $rr !== 'A') {
+				return false;
+			}
+
+			// CF cannot proxy internal/reserved addresses
+			return !IpCommon::reserved($param);
 		}
 
 		/**

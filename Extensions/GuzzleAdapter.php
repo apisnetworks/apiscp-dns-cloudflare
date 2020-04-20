@@ -24,7 +24,7 @@
 
 	class GuzzleAdapter extends Guzzle
 	{
-		const CONNECTION_TIMEOUT = 5;
+		const CONNECTION_TIMEOUT = 10;
 
 		protected $client;
 
