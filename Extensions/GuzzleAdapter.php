@@ -24,7 +24,7 @@
 
 	class GuzzleAdapter extends Guzzle
 	{
-		const CONNECTION_TIMEOUT = 10;
+		const CONNECTION_TIMEOUT = 5;
 
 		protected $client;
 
@@ -40,7 +40,7 @@
 				'base_uri' => $baseURI,
 				'headers'  => $headers,
 				'Accept'   => 'application/json',
-				'timeout'  => self::CONNECTION_TIMEOUT
+				'connect_timeout'  => self::CONNECTION_TIMEOUT
 			]);
 		}
 
