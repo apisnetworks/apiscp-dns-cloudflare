@@ -29,41 +29,44 @@
 		 */
 		public function valid(ConfigurationContext $ctx, &$var): bool
 		{
+			// allow dns.key in auth.yaml
+			$tmp = $var ?? defined('AUTH_CLOUDFLARE_KEY') ? AUTH_CLOUDFLARE_KEY : null;
 			// accept $var as a single token or as an array
-			if (is_string($var)) {
-				return static::keyValid(null, $var);
+			if (is_string($tmp)) {
+				return static::keyValid(null, $tmp);
 			}
 
-			if (!isset($var['key'])) {
+			if (!isset($tmp['key'])) {
 				return error("Cloudflare key must provided");
 			}
-			if (isset($var['email']) && !ctype_xdigit($var['key'])) {
+			if (isset($tmp['email']) && !ctype_xdigit($tmp['key'])) {
 				return error("Key must be in hexadecimal");
 			}
-			if (isset($var['email']) && !preg_match(\Regex::EMAIL, $var['email'])) {
+			if (isset($tmp['email']) && !preg_match(\Regex::EMAIL, $tmp['email'])) {
 				return error("Email address not properly formed");
 			}
 
 			foreach (['proxy', 'jumpstart'] as $name) {
-				if (!isset($var[$name])) {
+				if (!isset($tmp[$name])) {
 					// default
-					$var[$name] = true;
+					$tmp[$name] = true;
 				} else {
-					if ($var[$name] === 1 || $var[$name] === "1") {
-						$var[$name] = true;
-					} else if ($var[$name] === 0 || $var[$name] === "0") {
-						$var[$name] = false;
+					if ($tmp[$name] === 1 || $tmp[$name] === "1") {
+						$tmp[$name] = true;
+					} else if ($tmp[$name] === 0 || $tmp[$name] === "0") {
+						$tmp[$name] = false;
 					}
-					if (!\is_bool($var[$name])) {
+					if (!\is_bool($tmp[$name])) {
 						return error("`%s' must be true or false", $name);
 					}
 				}
 
 			}
 
-			if (!static::keyValid($var['email'] ?? null, (string)$var['key'])) {
+			if (!static::keyValid($tmp['email'] ?? null, (string)$tmp['key'])) {
 				return false;
 			}
+			$var = $tmp;
 
 			return true;
 		}

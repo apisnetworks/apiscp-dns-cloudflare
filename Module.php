@@ -60,7 +60,9 @@
 		public function __construct()
 		{
 			parent::__construct();
-			$this->key = $this->getServiceValue('dns', 'key', DNS_PROVIDER_KEY);
+			// two pathways to evaluating a key, either [dns] => key or auth.yaml
+			// [dns] => provider_key is set on creation unless... it's admin
+			$this->key = $this->getAuthenticationSettings();
 			if (null === $this->key || is_scalar($this->key)) {
 				// auth bearer
 				$this->key = [
@@ -79,6 +81,36 @@
 			}
 
 			$this->key['jumpstart'] = (bool)($this->key['jumpstart'] ?? false);
+		}
+
+		/**
+		 * Fetch authentication from site metadata, config.ini, or auth.yaml
+		 *
+		 * @return array|null|string
+		 */
+		private function getAuthenticationSettings()
+		{
+			if (null !== ($key = $this->getServiceValue('dns','key'))) {
+				return $key;
+			}
+
+			if (!defined('AUTH_CLOUDFLARE_KEY') || empty(AUTH_CLOUDFLARE_KEY)) {
+				return DNS_PROVIDER_KEY;
+			}
+
+			$params = [
+				'key' => AUTH_CLOUDFLARE_KEY
+			];
+
+			foreach (['proxy', 'jumpstart', 'email'] as $var) {
+				$ucvar = strtoupper($var);
+				if (!defined("AUTH_CLOUDFLARE_${ucvar}")) {
+					continue;
+				}
+				$params[$var] = constant("AUTH_CLOUDFLARE_${ucvar}");
+			}
+
+			return $params;
 		}
 
 		/**
