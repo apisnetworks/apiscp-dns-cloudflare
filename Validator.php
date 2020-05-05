@@ -30,7 +30,7 @@
 		public function valid(ConfigurationContext $ctx, &$var): bool
 		{
 			// allow dns.key in auth.yaml
-			$tmp = $var ?? defined('AUTH_CLOUDFLARE_KEY') ? AUTH_CLOUDFLARE_KEY : null;
+			$tmp = $var ?? (defined('AUTH_CLOUDFLARE_KEY') ? AUTH_CLOUDFLARE_KEY : null);
 			// accept $var as a single token or as an array
 			if (is_string($tmp)) {
 				return static::keyValid(null, $tmp);
