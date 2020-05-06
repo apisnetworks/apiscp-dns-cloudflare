@@ -14,6 +14,8 @@
 	use Cloudflare\API\Endpoints\User;
 	use Cloudflare\API\Endpoints\Zones;
 	use GuzzleHttp\Exception\ClientException;
+	use Opcenter\CliParser;
+	use Opcenter\Dns;
 	use Opcenter\Dns\Contracts\ServiceProvider;
 	use Opcenter\Dns\Providers\Cloudflare\Extensions\TokenVerify;
 	use Opcenter\Service\ConfigurationContext;
@@ -49,7 +51,7 @@
 			foreach (['proxy', 'jumpstart'] as $name) {
 				if (!isset($tmp[$name])) {
 					// default
-					$tmp[$name] = true;
+					$tmp[$name] = $this->getDefault($name);
 				} else {
 					if ($tmp[$name] === 1 || $tmp[$name] === "1") {
 						$tmp[$name] = true;
@@ -69,6 +71,30 @@
 			$var = $tmp;
 
 			return true;
+		}
+
+		/**
+		 * Get default setting
+		 *
+		 * @param string $name
+		 * @return bool
+		 */
+		private function getDefault(string $name): bool
+		{
+			$key = 'AUTH_CLOUDFLARE_' . strtoupper($name);
+			if (defined($key)) {
+				return (bool)constant($key);
+			}
+
+			// Second pass to pull settings
+			// when dns.default-provider is cloudflare
+			if (Dns::default() !== 'cloudflare') {
+				return false;
+			}
+
+			$default = DNS_PROVIDER_KEY;
+			$cfg = CliParser::parseArgs($default);
+			return (bool)array_get($cfg, $name, false);
 		}
 
 		/**
