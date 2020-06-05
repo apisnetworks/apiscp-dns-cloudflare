@@ -229,6 +229,7 @@
 				'rr' => $rr,
 				'parameter' => $parameter
 			]);
+
 			return (bool)$this->getRecordId($record);
 		}
 
@@ -495,13 +496,14 @@
 				$new = $merged->merge($new);
 				$cfu = clone $new;
 				$data = $cfu->spreadParameters();
-				$api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), $data + [
+				$result = $api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), $data + [
 					'type'    => $cfu['rr'],
 					'name'    => $cfu['name'],
 					'ttl'     => $cfu['ttl'] ?? null,
 					'content' => $cfu['parameter'],
 					'priority' => $data['data']['priority'] ?? null,
 				]);
+				$new->setMeta('id', $result->result->id ?? null);
 			} catch (ClientException $e) {
 				$reason = \json_decode($e->getResponse()->getBody()->getContents());
 				return error("Failed to update record `%s' on zone `%s' (old - rr: `%s', param: `%s'; new - name: `%s' rr: `%s', param: `%s'): %s",
