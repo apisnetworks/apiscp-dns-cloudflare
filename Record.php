@@ -31,7 +31,7 @@
 			}
 			if ($this->matches('rr', 'SRV')) {
 				$this['parameter'] = substr($this['parameter'], strrpos($this['parameter'], ' ')+1);
-				$name = substr($this->name, strlen($this->getMeta('service') . '.' . $this->getMeta('protocol')) + 1);
+				$name = substr($this->name, \strlen($this->getMeta('service') . '.' . $this->getMeta('protocol')) + 1);
 				return [
 					'data' => [
 						'service'  => $this->getMeta('service'),

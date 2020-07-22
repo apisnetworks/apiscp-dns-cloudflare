@@ -46,7 +46,7 @@
 
 		public function request(string $method, string $uri, array $data = [], array $headers = [])
 		{
-			if (!in_array($method, ['get', 'post', 'put', 'patch', 'delete'])) {
+			if (!\in_array($method, ['get', 'post', 'put', 'patch', 'delete'])) {
 				throw new \InvalidArgumentException('Request method must be get, post, put, patch, or delete');
 			}
 
@@ -60,8 +60,8 @@
 				if (array_get($ctx, 'total_time', 999) > self::CONNECTION_TIMEOUT - 1) {
 					throw new ConnectException(
 						_("Unable to connect to Cloudflare's API after " .
-							self::CONNECTION_TIMEOUT . " second timeout. " .
-							"See https://cloudflarestatus.com for more details."),
+							self::CONNECTION_TIMEOUT . ' second timeout. ' .
+							'See https://cloudflarestatus.com for more details.'),
 						$e->getRequest()
 					);
 				}
@@ -81,7 +81,7 @@
 				throw new JSONException();
 			}
 
-			if (isset($json->errors) && count($json->errors) >= 1) {
+			if (isset($json->errors) && \count($json->errors) >= 1) {
 				throw new ResponseException($json->errors[0]->message, $json->errors[0]->code);
 			}
 

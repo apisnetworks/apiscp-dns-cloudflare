@@ -74,7 +74,7 @@
 
 			if (!isset($this->key['proxy'])) {
 				$this->key['proxy'] = false;
-			} else if (is_string($this->key['proxy'])) {
+			} else if (\is_string($this->key['proxy'])) {
 				$this->key['proxy'] = $this->key['proxy'] === 'true';
 			} else {
 				$this->key['proxy'] = (bool)$this->key['proxy'];
@@ -94,7 +94,7 @@
 				return $key;
 			}
 
-			if (!defined('AUTH_CLOUDFLARE_KEY') || empty(AUTH_CLOUDFLARE_KEY)) {
+			if (!\defined('AUTH_CLOUDFLARE_KEY') || empty(AUTH_CLOUDFLARE_KEY)) {
 				return DNS_PROVIDER_KEY;
 			}
 
@@ -104,10 +104,10 @@
 
 			foreach (['proxy', 'jumpstart', 'email'] as $var) {
 				$ucvar = strtoupper($var);
-				if (!defined("AUTH_CLOUDFLARE_${ucvar}")) {
+				if (!\defined("AUTH_CLOUDFLARE_${ucvar}")) {
 					continue;
 				}
-				$params[$var] = constant("AUTH_CLOUDFLARE_${ucvar}");
+				$params[$var] = \constant("AUTH_CLOUDFLARE_${ucvar}");
 			}
 
 			return $params;
@@ -282,7 +282,7 @@
 			try {
 				$api->addZone($domain, $this->key['jumpstart'] ?? false);
 			} catch (ClientException $e) {
-				if (false !== strpos($e->getMessage(), "1061,")) {
+				if (false !== strpos($e->getMessage(), '1061,')) {
 					return info("Zone `%s' present in Cloudflare - not overwriting", $domain);
 				}
 
@@ -318,7 +318,7 @@
 		 * @param string $domain
 		 * @return null|string
 		 */
-		protected function zoneAxfr($domain): ?string
+		protected function zoneAxfr(string $domain): ?string
 		{
 			$client = $this->makeApi(DNS::class);
 			$ns = $this->get_hosting_nameservers($domain);
@@ -355,7 +355,7 @@
 				} while ($pagenr >= ++$page);
 				// naked zone if $records === []
 			} catch (ClientException $e) {
-				error("Failed to transfer DNS records from CF - try again later");
+				error('Failed to transfer DNS records from CF - try again later');
 
 				return null;
 			}
@@ -368,10 +368,10 @@
 						$parameter = $record->priority . ' ' . $record->content;
 						break;
 					case 'URI':
-						$parameter = $record->priority . " " . $record->data->weight . " " . $record->data->content;
+						$parameter = $record->priority . ' ' . $record->data->weight . ' ' . $record->data->content;
 						break;
 					case 'SRV':
-						$parameter = $record->priority . " " . $record->content;
+						$parameter = $record->priority . ' ' . $record->content;
 						break;
 					case 'TXT':
 						$parameter = $record->content;
@@ -389,7 +389,7 @@
 						'name'      => $key,
 						'rr'        => $record->type,
 						'ttl'       => $record->ttl,
-						'parameter' => str_replace("\t", " ", $parameter),
+						'parameter' => str_replace("\t", ' ', $parameter),
 					]
 				))->setMeta('id', $record->id);
 				$this->addCache($r);
@@ -418,7 +418,7 @@
 		public function get_hosting_nameservers(string $domain = null): array
 		{
 			if (!$domain) {
-				error("Cloudflare DNS provider requires the \$domain parameter");
+				error('Cloudflare DNS provider requires the $domain parameter');
 
 				return [];
 			}
@@ -449,7 +449,7 @@
 			/**
 			 * @todo prime whole cache vs per-domain priming on larger accounts
 			 */
-			$raw = array_map(function ($zone) {
+			$raw = array_map(static function ($zone) {
 				return (array)$zone;
 			}, $api->listZones('', '', 1, 1000)->result);
 
