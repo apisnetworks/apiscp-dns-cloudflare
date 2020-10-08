@@ -224,11 +224,14 @@
 			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $parameter)) {
 				return false;
 			}
-			$record = new Record($zone, [
-				'name' => $subdomain,
-				'rr' => $rr,
-				'parameter' => $parameter
-			]);
+			$args = [
+				'name'      => $subdomain,
+				'rr'        => $rr,
+			];
+			if ($parameter !== '') {
+				$args['parameter'] = $parameter;
+			}
+			$record = new Record($zone, $args);
 
 			return (bool)$this->getRecordId($record);
 		}
