@@ -26,6 +26,8 @@
 		protected const HAS_ORIGIN_MARKER = true;
 		public const DNS_TTL = 1800;
 
+		const DIG_SHLOOKUP = 'dig +norec +time=3 +tcp +short @%(nameserver)s %(hostname)s %(rr)s';
+
 		// @var int minimum TTL
 		public const DNS_TTL_MIN = 120;
 
@@ -224,14 +226,15 @@
 			if (!$this->canonicalizeRecord($zone, $subdomain, $rr, $parameter)) {
 				return false;
 			}
+			if (!$parameter && parent::record_exists($zone, $subdomain, $rr, $parameter)) {
+				return true;
+			}
 			$args = [
 				'name'      => $subdomain,
 				'rr'        => $rr,
+				'parameter' => $parameter
 			];
-			if ($parameter !== '') {
-				$args['parameter'] = $parameter;
-			}
-			$record = new Record($zone, $args);
+			$record = new LookupRecord($zone, $args);
 
 			return (bool)$this->getRecordId($record);
 		}

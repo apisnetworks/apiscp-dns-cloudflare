@@ -42,8 +42,10 @@
 				return error('Cloudflare key must provided');
 			}
 			if (isset($tmp['email']) && !ctype_xdigit($tmp['key'])) {
-				return error('Key must be in hexadecimal');
+				warn('API key must be in hexadecimal. Assuming "key" value API token and removing "email" parameter');
+				unset($tmp['email']);
 			}
+
 			if (isset($tmp['email']) && !preg_match(\Regex::EMAIL, $tmp['email'])) {
 				return error('Email address not properly formed');
 			}
