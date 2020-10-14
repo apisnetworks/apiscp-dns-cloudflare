@@ -28,6 +28,16 @@
 
 		const DIG_SHLOOKUP = 'dig +norec +time=3 +tcp +short @%(nameserver)s %(hostname)s %(rr)s';
 
+		// list of TLDs CloudFlare does not permit programmatic management of
+		// https://community.cloudflare.com/t/unable-to-update-ddns-using-api-for-some-tlds/167228
+		const RESTRICTED_TLDS = [
+			'cf',
+			'ga',
+			'gq',
+			'ml',
+			'tk'
+		];
+
 		// @var int minimum TTL
 		public const DNS_TTL_MIN = 120;
 
@@ -174,7 +184,7 @@
 				return error("Failed to create record `%s' type %s: %s",
 					$fqdn,
 					$rr,
-					array_get($error, 'errors.0.error_chain.0.message', array_get($error, 'errors.0.message'))
+					array_get($error, 'errors.0.error_chain.0.message', array_get($error, 'errors.0.message', array_get($error, 'error')))
 				);
 			}
 
@@ -284,6 +294,13 @@
 		 */
 		public function add_zone_backend(string $domain, string $ip): bool
 		{
+			foreach (self::RESTRICTED_TLDS as $tld) {
+				$tld = ".$tld";
+				if (substr($domain, -\strlen($tld)) === $tld) {
+					warn("Domain cannot be managed from within %s", PANEL_BRAND);
+					break;
+				}
+			}
 			$api = $this->makeApi(Zones::class);
 			try {
 				$api->addZone($domain, $this->key['jumpstart'] ?? false);
