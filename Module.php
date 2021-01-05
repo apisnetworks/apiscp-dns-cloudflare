@@ -24,7 +24,6 @@
 		 * apex markers are marked with @
 		 */
 		protected const HAS_ORIGIN_MARKER = true;
-		public const DNS_TTL = 1800;
 
 		const DIG_SHLOOKUP = 'dig +norec +time=3 +tcp +short @%(nameserver)s %(hostname)s %(rr)s';
 
