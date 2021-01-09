@@ -353,9 +353,7 @@
 			$preamble = [
 				"${domain}.\t${ttldef}\tIN\tSOA\t${soa['parameter']}",
 			];
-			foreach ($this->get_hosting_nameservers($domain) as $ns) {
-				$preamble[] = "${domain}.\t${ttldef}\tIN\tNS\t${ns}.";
-			}
+
 			try {
 				$id = $this->getZoneId($domain);
 				if (null === $id) {
