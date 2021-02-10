@@ -553,7 +553,7 @@
 			if ($rr === 'MX') {
 				$param = rtrim($param, '.');
 			}
-			if ($rr === 'TXT' && !preg_match('/^"[^"]*"$/', $param)) {
+			if ($rr === 'TXT' && preg_match('/^"[^"]*"$/', $param)) {
 				$param = trim($param, '"');
 			}
 			// @TODO move to general canonicalization?
