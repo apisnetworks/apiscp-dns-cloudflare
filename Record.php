@@ -173,7 +173,7 @@
 			return [];
 		}
 
-		public function is(\Opcenter\Dns\Record $r)
+		public function is(\Opcenter\Dns\Record $r): bool
 		{
 			if (parent::is($r)) {
 				return true;
