@@ -48,7 +48,7 @@
 			'CAA',
 			'CERT',
 			'CNAME',
-			'DNSKEY',
+			/*'DNSKEY', no longer directly supported */
 			'DS',
 			'LOC',
 			'MX',
@@ -57,8 +57,9 @@
 			'PTR',
 			'SMIMEA',
 			'SRV',
-			'SPF',
+			/*'SPF', deprecated in RFC 7208 */
 			'SSHFP',
+			'SVCB',
 			'TLSA',
 			'TXT',
 			'URI',

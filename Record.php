@@ -147,6 +147,17 @@
 				];
 			}
 
+			if ($this->matches('rr', 'SVCB')) {
+				$this['parameter'] = '';
+				return [
+					'data' => [
+						'priority' => (int)$this->getMeta('priority'),
+						'target'   => $this->getMeta('target'),
+						'value'    => $this->getMeta('data')
+					]
+				];
+			}
+
 			if ($this->matches('rr', 'TLSA')) {
 				$this['parameter'] = '';
 
