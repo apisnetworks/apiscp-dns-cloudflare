@@ -23,15 +23,25 @@
 		 */
 		public function spreadParameters(): array
 		{
+			$parameters = $this->expandFromMeta();
+			$this->dirty = false;
+
+			return $parameters;
+		}
+
+		private function expandFromMeta(): array
+		{
 			if ($this->matches('rr', 'MX')) {
 				$this['parameter'] = $this->getMeta('data');
+
 				return [
 					'priority' => (int)$this->getMeta('priority'),
 				];
 			}
 			if ($this->matches('rr', 'SRV')) {
-				$this['parameter'] = substr($this['parameter'], strrpos($this['parameter'], ' ')+1);
+				$this['parameter'] = substr($this['parameter'], strrpos($this['parameter'], ' ') + 1);
 				$name = substr($this->name, \strlen($this->getMeta('service') . '.' . $this->getMeta('protocol')) + 1);
+
 				return [
 					'data' => [
 						'service'  => $this->getMeta('service'),
@@ -46,6 +56,7 @@
 			}
 			if ($this->matches('rr', 'CAA')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'flags' => (int)$this->getMeta('flags'),
@@ -56,18 +67,20 @@
 			}
 			if ($this->matches('rr', 'CERT')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'certificate' => $this->getMeta('data'),
-						'type'      => (int)$this->getMeta('type'),
-						'key_tag'   => (int)$this->getMeta('key_tag'),
-						'algorithm' => (int)$this->getMeta('algorithm')
+						'type'        => (int)$this->getMeta('type'),
+						'key_tag'     => (int)$this->getMeta('key_tag'),
+						'algorithm'   => (int)$this->getMeta('algorithm')
 					]
 				];
 			}
 
 			if ($this->matches('rr', 'DNSKEY')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'flags'      => (int)$this->getMeta('flags'),
@@ -80,6 +93,7 @@
 
 			if ($this->matches('rr', 'DS')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'key_tag'     => (int)$this->getMeta('key_tag'),
@@ -92,6 +106,7 @@
 
 			if ($this->matches('rr', 'LOC')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'lat_degrees'    => (int)$this->getMeta('lat_degrees'),
@@ -112,6 +127,7 @@
 
 			if ($this->matches('rr', 'NAPTR')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'order'       => (int)$this->getMeta('order'),
@@ -126,6 +142,7 @@
 
 			if ($this->matches('rr', 'SMIMEA')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'usage'         => (int)$this->getMeta('order'),
@@ -138,6 +155,7 @@
 
 			if ($this->matches('rr', 'SSHFP')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'algorithm'   => (int)$this->getMeta('algorithm'),
@@ -149,6 +167,7 @@
 
 			if ($this->matches('rr', 'SVCB')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
 						'priority' => (int)$this->getMeta('priority'),
@@ -173,14 +192,16 @@
 
 			if ($this->matches('rr', 'URI')) {
 				$this['parameter'] = '';
+
 				return [
 					'data' => [
-						'priority'       => (int)$this->getMeta('priority'),
-						'weight'         => (int)$this->getMeta('weight'),
-						'content'        => $this->trim((string)$this->getMeta('data')),
+						'priority' => (int)$this->getMeta('priority'),
+						'weight'   => (int)$this->getMeta('weight'),
+						'content'  => $this->trim((string)$this->getMeta('data')),
 					]
 				];
 			}
+
 			return [];
 		}
 
