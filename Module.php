@@ -525,11 +525,12 @@
 				$cfu = clone $new;
 				$data = $cfu->spreadParameters();
 				$result = $api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), $data + [
-					'type'    => $cfu['rr'],
-					'name'    => $cfu['name'],
-					'ttl'     => $cfu['ttl'] ?? null,
-					'content' => $cfu['parameter'],
+					'type'     => $cfu['rr'],
+					'name'     => $cfu['name'],
+					'ttl'      => $cfu['ttl'] ?? null,
+					'content'  => $cfu['parameter'],
 					'priority' => $data['data']['priority'] ?? null,
+					'proxied'  => $this->isProxiable($cfu['rr'], (string)$cfu['parameter'])
 				]);
 				$new->setMeta('id', $result->result->id ?? null);
 			} catch (ClientException $e) {
