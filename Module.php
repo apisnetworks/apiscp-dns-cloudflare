@@ -419,7 +419,7 @@
 						'ttl'       => $record->ttl,
 						'parameter' => str_replace("\t", ' ', $parameter),
 					]
-				))->setMeta('id', $record->id);
+				))->setMeta('id', $record->id)->setMeta('proxied', $record->proxied);
 				$this->addCache($r);
 				$preamble[] = $record->name . ".\t" . $record->ttl . "\tIN\t" .
 					$record->type . "\t" . $parameter;
@@ -524,13 +524,15 @@
 				$new = $merged->merge($new);
 				$cfu = clone $new;
 				$data = $cfu->spreadParameters();
+				$wasProxied = $this->getRecordFromCache($old)->getMeta('proxied');
+
 				$result = $api->updateRecordDetails($this->getZoneId($zone), $this->getRecordId($old), $data + [
 					'type'     => $cfu['rr'],
 					'name'     => $cfu['name'],
 					'ttl'      => $cfu['ttl'] ?? null,
 					'content'  => $cfu['parameter'],
 					'priority' => $data['data']['priority'] ?? null,
-					'proxied'  => $this->isProxiable($cfu['rr'], (string)$cfu['parameter'])
+					'proxied'  => $wasProxied && $this->isProxiable($cfu['rr'], (string)$cfu['parameter'])
 				]);
 				$new->setMeta('id', $result->result->id ?? null);
 			} catch (ClientException $e) {
