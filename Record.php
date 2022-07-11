@@ -15,6 +15,14 @@
 
 	class Record extends \Opcenter\Dns\Record
 	{
+		public function __construct(string $zone, array $args)
+		{
+			parent::__construct($zone, $args);
+			if ($this->name === '') {
+				$this->name = '@';
+			}
+		}
+
 		/**
 		 * Remove bunched components from parameter before add
 		 *

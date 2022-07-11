@@ -20,10 +20,7 @@
 
 	class Module extends \Dns_Module implements ProviderInterface
 	{
-		/**
-		 * apex markers are marked with @
-		 */
-		protected const HAS_ORIGIN_MARKER = true;
+		const HAS_ORIGIN_MARKER = true;
 
 		const DIG_SHLOOKUP = 'dig +norec +time=3 +tcp +short @%(nameserver)s %(hostname)s %(rr)s';
 
@@ -159,7 +156,6 @@
 				'parameter' => $param,
 				'ttl'       => $ttl
 			]);
-
 			try {
 				$cfu = clone $record;
 				/**
@@ -560,6 +556,9 @@
 		): bool {
 			if (!parent::canonicalizeRecord($zone, $subdomain, $rr, $param, $ttl)) {
 				return false;
+			}
+			if (!$subdomain) {
+				$subdomain = '@';
 			}
 			if ($rr === 'MX') {
 				$param = rtrim($param, '.');
