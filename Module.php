@@ -20,7 +20,10 @@
 
 	class Module extends \Dns_Module implements ProviderInterface
 	{
+		use \NamespaceUtilitiesTrait;
+
 		const HAS_ORIGIN_MARKER = true;
+		const SHOW_NS_APEX = false;
 
 		const DIG_SHLOOKUP = 'dig +norec +time=3 +tcp +short @%(nameserver)s %(hostname)s %(rr)s';
 
@@ -37,7 +40,6 @@
 		// @var int minimum TTL
 		public const DNS_TTL_MIN = 120;
 
-		use \NamespaceUtilitiesTrait;
 		// @var array API credentials
 		protected static $permitted_records = [
 			'A',
@@ -348,15 +350,22 @@
 		{
 			$client = $this->makeApi(DNS::class);
 			$ns = $this->get_hosting_nameservers($domain);
-			$soa = array_get($this->get_records_external('', 'soa', $domain, $ns),
-				0, []);
 			if (!$ns) {
 				return null;
 			}
-			$ttldef = (int)array_get(preg_split('/\s+/', $soa['parameter'] ?? ''), 6, static::DNS_TTL);
-			$preamble = [
-				"${domain}.\t${ttldef}\tIN\tSOA\t${soa['parameter']}",
-			];
+
+			$soa = array_get($this->get_records_external('', 'soa', $domain, $ns),
+				0, []);
+
+			$preamble = [];
+
+			if (isset($soa['parameter']))
+			{
+				$ttldef = (int)array_get(preg_split('/\s+/', $soa['parameter']), 6, static::DNS_TTL);
+				$preamble = [
+					"${domain}.\t${ttldef}\tIN\tSOA\t${soa['parameter']}",
+				];
+			}
 
 			try {
 				$id = $this->getZoneId($domain);
