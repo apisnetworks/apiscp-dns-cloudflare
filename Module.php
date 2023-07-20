@@ -13,19 +13,19 @@
 	use Cloudflare\API\Endpoints\API;
 	use Cloudflare\API\Endpoints\DNS;
 	use Cloudflare\API\Endpoints\Zones;
-	use Opcenter\Dns\Record as RecordBase;
 	use GuzzleHttp\Exception\ClientException;
 	use Module\Provider\Contracts\ProviderInterface;
+	use Opcenter\CliParser;
+	use Opcenter\Dns\Record as RecordBase;
 	use Opcenter\Net\IpCommon;
 
 	class Module extends \Dns_Module implements ProviderInterface
 	{
 		use \NamespaceUtilitiesTrait;
 
+		const PAGINATION_LIMIT = 1000;
 		const HAS_ORIGIN_MARKER = true;
 		const SHOW_NS_APEX = false;
-
-		const DIG_SHLOOKUP = 'dig +norec +time=3 +tcp +short @%(nameserver)s %(hostname)s %(rr)s';
 
 		// list of TLDs CloudFlare does not permit programmatic management of
 		// https://community.cloudflare.com/t/unable-to-update-ddns-using-api-for-some-tlds/167228
@@ -106,7 +106,8 @@
 			}
 
 			if (!\defined('AUTH_CLOUDFLARE_KEY') || empty(AUTH_CLOUDFLARE_KEY)) {
-				return DNS_PROVIDER_KEY;
+				$key = DNS_PROVIDER_KEY;
+				return CliParser::parseArgs($key);
 			}
 
 			$params = [
@@ -475,7 +476,7 @@
 			return $this->metaCache[$domain][$key] ?? null;
 		}
 
-		protected function populateZoneMetaCache()
+		protected function populateZoneMetaCache(int $offset = 1)
 		{
 
 			$api = $this->makeApi(Zones::class);
@@ -484,9 +485,12 @@
 			 */
 			$raw = array_map(static function ($zone) {
 				return (array)$zone;
-			}, $api->listZones('', '', 1, 1000)->result);
+			}, $api->listZones('', '', $offset, static::PAGINATION_LIMIT)->result);
 
-			$this->metaCache = array_merge($this->metaCache, array_combine(array_column($raw, 'name'), $raw));
+			$this->metaCache = array_merge($this->metaCache, array_combine($items = array_column($raw, 'name'), $raw));
+			if (isset($items[static::PAGINATION_LIMIT - 1])) {
+				$this->populateZoneMetaCache(++$offset);
+			}
 		}
 
 		/**
