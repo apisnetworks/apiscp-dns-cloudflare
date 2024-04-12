@@ -16,12 +16,15 @@
 	use GuzzleHttp\Exception\ClientException;
 	use Module\Provider\Contracts\ProviderInterface;
 	use Opcenter\CliParser;
+	use Opcenter\Crypto\Keyring;
+	use Opcenter\Crypto\KeyringTrait;
 	use Opcenter\Dns\Record as RecordBase;
 	use Opcenter\Net\IpCommon;
 
 	class Module extends \Dns_Module implements ProviderInterface
 	{
 		use \NamespaceUtilitiesTrait;
+		use KeyringTrait;
 
 		const PAGINATION_LIMIT = 1000;
 		const HAS_ORIGIN_MARKER = true;
@@ -65,6 +68,7 @@
 		];
 
 		private $key;
+
 		//@var int DNS_TTL
 		private $metaCache = [];
 
@@ -102,7 +106,7 @@
 		private function getAuthenticationSettings()
 		{
 			if (null !== ($key = $this->getServiceValue('dns','key'))) {
-				return $key;
+				return Keyring::is($key) ? $this->readKeyringValue($key) : $key;
 			}
 
 			if (!\defined('AUTH_CLOUDFLARE_KEY') || empty(AUTH_CLOUDFLARE_KEY)) {
