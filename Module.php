@@ -105,7 +105,7 @@
 		 */
 		private function getAuthenticationSettings()
 		{
-			if (null !== ($key = $this->getServiceValue('dns','key'))) {
+			if (is_string($key = $this->getServiceValue('dns','key'))) {
 				return Keyring::is($key) ? $this->readKeyringValue($key) : $key;
 			}
 
