@@ -35,7 +35,8 @@
 			$tmp = $var ?? (\defined('AUTH_CLOUDFLARE_KEY') ? AUTH_CLOUDFLARE_KEY : null);
 			// accept $var as a single token or as an array
 			if (\is_string($tmp)) {
-				return static::keyValid(null, $tmp);
+				$email = \defined('AUTH_CLOUDFLARE_EMAIL') && !empty(AUTH_CLOUDFLARE_EMAIL) ? AUTH_CLOUDFLARE_EMAIL : null;
+				return static::keyValid($email, $tmp);
 			}
 
 			if (!isset($tmp['key'])) {
