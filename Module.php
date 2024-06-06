@@ -86,7 +86,6 @@
 			}
 
 			$this->key += ['email' => null, 'key' => null];
-
 			if (!isset($this->key['proxy'])) {
 				$this->key['proxy'] = false;
 			} else if (\is_string($this->key['proxy'])) {
@@ -107,6 +106,8 @@
 		{
 			if (is_string($key = $this->getServiceValue('dns','key'))) {
 				return Keyring::is($key) ? $this->readKeyringValue($key) : $key;
+			} else if (!empty($key)) {
+				return $key;
 			}
 
 			if (!\defined('AUTH_CLOUDFLARE_KEY') || empty(AUTH_CLOUDFLARE_KEY)) {
