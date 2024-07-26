@@ -407,7 +407,7 @@
 						$parameter = $record->priority . ' ' . $record->content;
 						break;
 					case 'URI':
-						$parameter = $record->priority . ' ' . $record->data->weight . ' ' . $record->data->content;
+						$parameter = $record->priority . ' ' . $record->data->weight . ' ' . $record->data->target;
 						break;
 					case 'SRV':
 						$parameter = $record->priority . ' ' . $record->content;

@@ -205,7 +205,7 @@
 					'data' => [
 						'priority' => (int)$this->getMeta('priority'),
 						'weight'   => (int)$this->getMeta('weight'),
-						'content'  => $this->trim((string)$this->getMeta('data')),
+						'target'   => $this->trim((string)$this->getMeta('data')),
 					]
 				];
 			}
