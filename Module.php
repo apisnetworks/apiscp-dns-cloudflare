@@ -121,10 +121,10 @@
 
 			foreach (['proxy', 'jumpstart', 'email'] as $var) {
 				$ucvar = strtoupper($var);
-				if (!\defined("AUTH_CLOUDFLARE_${ucvar}")) {
+				if (!\defined("AUTH_CLOUDFLARE_{$ucvar}")) {
 					continue;
 				}
-				$params[$var] = \constant("AUTH_CLOUDFLARE_${ucvar}");
+				$params[$var] = \constant("AUTH_CLOUDFLARE_{$ucvar}");
 			}
 
 			return $params;
@@ -369,7 +369,7 @@
 			{
 				$ttldef = (int)array_get(preg_split('/\s+/', $soa['parameter']), 6, static::DNS_TTL);
 				$preamble = [
-					"${domain}.\t${ttldef}\tIN\tSOA\t${soa['parameter']}",
+					"{$domain}.\t{$ttldef}\tIN\tSOA\t{$soa['parameter']}",
 				];
 			}
 
